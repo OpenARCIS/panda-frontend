@@ -1,0 +1,133 @@
+.plan-display {
+    margin-left: calc(36px + var(--spacing-3));
+    background: var(--bg-glass);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-lg);
+    overflow: hidden;
+}
+
+.plan-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: var(--spacing-3) var(--spacing-4);
+    background: transparent;
+    border: none;
+    cursor: pointer;
+    transition: background var(--transition-fast);
+}
+
+.plan-header:hover {
+    background: var(--bg-glass-hover);
+}
+
+.plan-header-left {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.plan-icon {
+    width: 24px;
+    height: 24px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-gradient);
+    border-radius: var(--radius-sm);
+    color: white;
+}
+
+.plan-title {
+    font-size: var(--font-size-sm);
+    font-weight: var(--font-weight-medium);
+    color: var(--text-primary);
+}
+
+.plan-header svg:last-child {
+    color: var(--text-tertiary);
+}
+
+.plan-steps {
+    padding: 0 var(--spacing-4) var(--spacing-4);
+    display: flex;
+    flex-direction: column;
+}
+
+.plan-step {
+    display: flex;
+    gap: var(--spacing-3);
+}
+
+.plan-step-indicator {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    flex-shrink: 0;
+}
+
+.step-circle {
+    color: var(--text-muted);
+}
+
+.step-check {
+    color: var(--success);
+}
+
+.plan-step-line {
+    width: 2px;
+    flex: 1;
+    min-height: 16px;
+    background: var(--border-subtle);
+    margin: 4px 0;
+}
+
+.plan-step-content {
+    flex: 1;
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+    padding-bottom: var(--spacing-3);
+}
+
+.plan-step-icon {
+    width: 28px;
+    height: 28px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-md);
+    color: var(--accent-secondary);
+    flex-shrink: 0;
+}
+
+.plan-step-completed .plan-step-icon {
+    background: var(--success-bg);
+    border-color: transparent;
+    color: var(--success);
+}
+
+.plan-step-info {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding-top: 4px;
+}
+
+.plan-step-action {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+}
+
+.plan-step-completed .plan-step-action {
+    color: var(--text-secondary);
+}
+
+.plan-step-details {
+    font-size: var(--font-size-xs);
+    color: var(--text-tertiary);
+}

@@ -1,0 +1,213 @@
+.chat-page {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    height: calc(100vh - var(--header-height));
+    max-height: calc(100vh - var(--header-height));
+    overflow: hidden;
+}
+
+.chat-container {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    max-width: 900px;
+    width: 100%;
+    margin: 0 auto;
+    padding: 0 var(--spacing-4);
+    overflow: hidden;
+}
+
+/* Messages Area */
+.chat-messages {
+    flex: 1;
+    overflow-y: auto;
+    padding: var(--spacing-6) 0;
+}
+
+.chat-messages-inner {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-6);
+}
+
+.message-wrapper {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-3);
+    animation: fadeInUp var(--transition-base) ease-out;
+}
+
+.message {
+    display: flex;
+    gap: var(--spacing-3);
+    max-width: 85%;
+}
+
+.message-user {
+    flex-direction: row-reverse;
+    margin-left: auto;
+}
+
+.message-assistant {
+    margin-right: auto;
+}
+
+.message-avatar {
+    width: 36px;
+    height: 36px;
+    border-radius: var(--radius-lg);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.user-avatar {
+    background: var(--accent-gradient);
+    color: white;
+}
+
+.assistant-avatar {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    color: var(--accent-primary);
+}
+
+.message-content {
+    padding: var(--spacing-4);
+    border-radius: var(--radius-xl);
+    line-height: var(--line-height-relaxed);
+}
+
+.message-user .message-content {
+    background: #DDD6FE;
+    color: #18181b;
+    font-weight: 500;
+    border-bottom-right-radius: var(--radius-sm);
+}
+
+.message-assistant .message-content {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    color: var(--text-primary);
+    border-bottom-left-radius: var(--radius-sm);
+}
+
+.message-error .message-content {
+    background: var(--error-bg);
+    border-color: rgba(239, 68, 68, 0.3);
+}
+
+.message-text {
+    font-size: var(--font-size-base);
+    white-space: pre-wrap;
+    word-break: break-word;
+}
+
+.message-user .message-text {
+    color: #18181b;
+}
+
+.message-time {
+    font-size: var(--font-size-xs);
+    margin-top: var(--spacing-2);
+    opacity: 0.7;
+}
+
+/* Typing Indicator */
+.typing-indicator {
+    display: flex;
+    gap: 4px;
+    padding: var(--spacing-1) 0;
+}
+
+.typing-indicator span {
+    width: 8px;
+    height: 8px;
+    background: var(--text-muted);
+    border-radius: 50%;
+    animation: bounce 1.4s ease-in-out infinite;
+}
+
+.typing-indicator span:nth-child(1) {
+    animation-delay: 0s;
+}
+
+.typing-indicator span:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator span:nth-child(3) {
+    animation-delay: 0.4s;
+}
+
+@keyframes bounce {
+
+    0%,
+    60%,
+    100% {
+        transform: translateY(0);
+    }
+
+    30% {
+        transform: translateY(-6px);
+    }
+}
+
+/* Input Area */
+.chat-input-container {
+    padding: var(--spacing-4) 0 var(--spacing-6);
+    border-top: 1px solid var(--border-subtle);
+    background: linear-gradient(to top, var(--bg-primary) 0%, transparent 100%);
+}
+
+.chat-input-wrapper {
+    display: flex;
+    gap: var(--spacing-3);
+    align-items: flex-end;
+}
+
+.chat-send-btn {
+    flex-shrink: 0;
+    height: 52px;
+    width: 52px;
+    padding: 0 !important;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.chat-hint {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-1);
+    justify-content: center;
+    margin-top: var(--spacing-2);
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+/* Scrollbar */
+.chat-messages::-webkit-scrollbar {
+    width: 6px;
+}
+
+.chat-messages::-webkit-scrollbar-track {
+    background: transparent;
+}
+
+.chat-messages::-webkit-scrollbar-thumb {
+    background: var(--bg-hover);
+    border-radius: var(--radius-full);
+}
+
+@media (max-width: 768px) {
+    .chat-container {
+        padding: 0 var(--spacing-2);
+    }
+
+    .message {
+        max-width: 92%;
+    }
+}

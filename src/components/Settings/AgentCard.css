@@ -1,0 +1,35 @@
+.agent-card {
+    height: 100%;
+}
+
+.agent-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-3);
+}
+
+.agent-icon {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: var(--accent-gradient);
+    border-radius: var(--radius-lg);
+    color: white;
+    flex-shrink: 0;
+}
+
+.agent-settings {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-5);
+}
+
+.temp-hints {
+    display: flex;
+    justify-content: space-between;
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin-top: calc(var(--spacing-3) * -1);
+}
