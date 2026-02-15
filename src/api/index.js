@@ -67,16 +67,16 @@ export const gmailAPI = {
 
 export const chatAPI = {
     sendMessage: (message, threadId = null) =>
-        fetchAPI('/manual_flow/chat', {
+        fetchAPI('/chat', {
             method: 'POST',
             body: JSON.stringify({ message, thread_id: threadId }),
         }),
 
     getAllChats: () =>
-        fetchAPI('/manual_flow/all_chats'),
+        fetchAPI('/chat/all_chats'),
 
     getChatHistory: (threadId) =>
-        fetchAPI(`/manual_flow/chat/${encodeURIComponent(threadId)}`),
+        fetchAPI(`/chat/${encodeURIComponent(threadId)}`),
 };
 
 // ==========================================
