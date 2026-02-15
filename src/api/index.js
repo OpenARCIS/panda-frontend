@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8501';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://test.itsvinayak.eu.org:8501';
 
 // Helper function for API calls
 async function fetchAPI(endpoint, options = {}) {
@@ -66,11 +66,17 @@ export const gmailAPI = {
 // ==========================================
 
 export const chatAPI = {
-    sendMessage: (message) =>
+    sendMessage: (message, threadId = null) =>
         fetchAPI('/manual_flow/chat', {
             method: 'POST',
-            body: JSON.stringify({ message }),
+            body: JSON.stringify({ message, thread_id: threadId }),
         }),
+
+    getAllChats: () =>
+        fetchAPI('/manual_flow/all_chats'),
+
+    getChatHistory: (threadId) =>
+        fetchAPI(`/manual_flow/chat/${encodeURIComponent(threadId)}`),
 };
 
 // ==========================================

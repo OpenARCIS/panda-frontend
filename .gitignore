@@ -115,3 +115,5 @@ dist
 
 # macos
 .DS_Store
+API_SCHEMA.md
+api_schema.json
