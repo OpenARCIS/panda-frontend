@@ -8,6 +8,7 @@ import {
 } from 'lucide-react';
 import { Card, CardContent, Button, Loader } from '../../components/ui';
 import AgentCard from '../../components/Settings/AgentCard';
+import VoiceUpload from '../../components/Settings/VoiceUpload';
 import { settingsAPI } from '../../api';
 import './Settings.css';
 
@@ -136,6 +137,8 @@ export default function GeneralSettings() {
                     />
                 ))}
             </div>
+
+            <VoiceUpload />
 
             {Object.keys(agents).length === 0 && (
                 <Card className="no-agents-card">

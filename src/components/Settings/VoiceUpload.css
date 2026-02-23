@@ -1,0 +1,198 @@
+.voice-upload-card {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-subtle);
+    border-radius: var(--radius-xl);
+    padding: var(--spacing-6);
+    margin-top: var(--spacing-6);
+}
+
+.voice-upload-header {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--spacing-4);
+    margin-bottom: var(--spacing-6);
+}
+
+.voice-upload-icon-wrapper {
+    background: var(--accent-gradient);
+    color: white;
+    padding: var(--spacing-3);
+    border-radius: var(--radius-lg);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+.voice-upload-title {
+    font-size: var(--font-size-lg);
+    font-weight: 600;
+    color: var(--text-primary);
+    margin: 0 0 var(--spacing-1) 0;
+}
+
+.voice-upload-desc {
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    margin: 0;
+    line-height: 1.5;
+}
+
+.voice-upload-form {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-4);
+}
+
+.form-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--spacing-2);
+}
+
+.form-label {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.form-input {
+    background: var(--bg-primary);
+    border: 1px solid var(--border-default);
+    padding: var(--spacing-3);
+    border-radius: var(--radius-md);
+    color: var(--text-primary);
+    font-family: inherit;
+    transition: border-color var(--transition-fast);
+}
+
+.form-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+    box-shadow: 0 0 0 2px rgba(139, 92, 246, 0.1);
+}
+
+.form-hint {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.file-drop-area {
+    border: 2px dashed var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-6);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+    background: rgba(255, 255, 255, 0.02);
+}
+
+.file-drop-area:hover {
+    border-color: var(--accent-primary);
+    background: rgba(139, 92, 246, 0.05);
+}
+
+.drop-icon {
+    color: var(--text-muted);
+    margin-bottom: var(--spacing-2);
+}
+
+.drop-text {
+    font-size: var(--font-size-sm);
+    color: var(--text-primary);
+    font-weight: 500;
+    margin: 0 0 4px 0;
+}
+
+.drop-hint {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+    margin: 0;
+}
+
+.hidden-file-input {
+    display: none;
+}
+
+.file-selected-area {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: var(--spacing-3) var(--spacing-4);
+    background: var(--bg-primary);
+    border: 1px solid var(--accent-primary);
+    border-radius: var(--radius-md);
+    box-shadow: 0 0 0 1px rgba(139, 92, 246, 0.1);
+}
+
+.file-info {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-3);
+}
+
+.file-icon {
+    color: var(--accent-primary);
+}
+
+.file-name {
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    color: var(--text-primary);
+}
+
+.file-size {
+    font-size: var(--font-size-xs);
+    color: var(--text-muted);
+}
+
+.file-remove-btn {
+    background: transparent;
+    border: none;
+    color: var(--text-muted);
+    cursor: pointer;
+    padding: var(--spacing-1);
+    border-radius: var(--radius-sm);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition: all var(--transition-fast);
+}
+
+.file-remove-btn:hover {
+    background: var(--error-bg);
+    color: var(--error-text, #ef4444);
+}
+
+.voice-upload-actions {
+    margin-top: var(--spacing-2);
+}
+
+.w-full {
+    width: 100%;
+    justify-content: center;
+}
+
+.upload-alert {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-3);
+    border-radius: var(--radius-md);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+}
+
+.upload-alert.success {
+    background: rgba(16, 185, 129, 0.1);
+    color: #10b981;
+    border: 1px solid rgba(16, 185, 129, 0.2);
+}
+
+.upload-alert.error {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+    border: 1px solid rgba(239, 68, 68, 0.2);
+}

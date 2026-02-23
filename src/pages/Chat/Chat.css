@@ -327,6 +327,57 @@
     background: linear-gradient(to top, var(--bg-primary) 0%, transparent 100%);
 }
 
+.chat-input-actions {
+    display: flex;
+    justify-content: center;
+    gap: var(--spacing-2);
+    margin-bottom: var(--spacing-3);
+}
+
+.mode-toggle-btn {
+    display: flex;
+    align-items: center;
+    gap: var(--spacing-2);
+    padding: var(--spacing-2) var(--spacing-4);
+    border-radius: var(--radius-full);
+    border: 1px solid var(--border-default);
+    background: var(--bg-primary);
+    color: var(--text-secondary);
+    font-size: var(--font-size-sm);
+    font-weight: 500;
+    cursor: pointer;
+    transition: all var(--transition-fast);
+}
+
+.mode-toggle-btn:hover {
+    background: var(--bg-hover);
+    color: var(--text-primary);
+}
+
+.mode-toggle-btn.active {
+    background: var(--accent-primary);
+    color: white;
+    border-color: var(--accent-primary);
+    box-shadow: 0 4px 12px rgba(139, 92, 246, 0.2);
+}
+
+.voice-id-input {
+    background: var(--bg-elevated);
+    border: 1px solid var(--border-default);
+    border-radius: var(--radius-md);
+    padding: var(--spacing-2) var(--spacing-3);
+    color: var(--text-primary);
+    font-size: var(--font-size-sm);
+    width: 140px;
+    font-family: inherit;
+    transition: border-color var(--transition-fast);
+}
+
+.voice-id-input:focus {
+    outline: none;
+    border-color: var(--accent-primary);
+}
+
 .chat-input-wrapper {
     display: flex;
     gap: var(--spacing-3);

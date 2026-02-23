@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect, useCallback } from 'react';
-import { Send, Loader2, Bot, User, Sparkles, Plus, MessageSquare, Clock } from 'lucide-react';
+import { Send, Loader2, Bot, User, Sparkles, Plus, MessageSquare, Clock, Volume2, Type } from 'lucide-react';
 import { Card, Button } from '../../components/ui';
 import MessageBubble from '../../components/Chat/MessageBubble';
 import PlanDisplay from '../../components/Chat/PlanDisplay';
@@ -57,7 +57,15 @@ export default function Chat() {
     const [threadId, setThreadId] = useState(null);
     const [threads, setThreads] = useState([]);
     const [threadsLoading, setThreadsLoading] = useState(false);
+    const [isVoiceMode, setIsVoiceMode] = useState(false);
+    const [voiceId, setVoiceId] = useState('');
+
     const messagesEndRef = useRef(null);
+
+    // Audio streaming state
+    const audioQueue = useRef([]);
+    const isPlaying = useRef(false);
+    const currentAudio = useRef(null);
 
     const scrollToBottom = () => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
@@ -66,6 +74,17 @@ export default function Chat() {
     useEffect(() => {
         scrollToBottom();
     }, [messages]);
+
+    // Cleanup audio on unmount
+    useEffect(() => {
+        return () => {
+            if (currentAudio.current) {
+                currentAudio.current.pause();
+                currentAudio.current = null;
+            }
+            audioQueue.current = [];
+        };
+    }, []);
 
     // Fetch threads on mount
     const loadThreads = useCallback(async () => {
@@ -119,6 +138,33 @@ export default function Chat() {
         }
     };
 
+    const playNextAudio = useCallback(() => {
+        if (audioQueue.current.length === 0) {
+            isPlaying.current = false;
+            return;
+        }
+
+        isPlaying.current = true;
+        const nextAudioData = audioQueue.current.shift();
+        const audioSrc = `data:audio/wav;base64,${nextAudioData}`;
+        const audio = new Audio(audioSrc);
+        currentAudio.current = audio;
+
+        audio.onended = () => {
+            playNextAudio();
+        };
+
+        audio.onerror = (e) => {
+            console.error("Audio playback error", e);
+            playNextAudio();
+        };
+
+        audio.play().catch(e => {
+            console.error("Failed to play audio chunk:", e);
+            playNextAudio();
+        });
+    }, []);
+
     const handleSend = async () => {
         if (!input.trim() || isLoading) return;
 
@@ -133,40 +179,116 @@ export default function Chat() {
         setInput('');
         setIsLoading(true);
 
-        try {
-            const response = await chatAPI.sendMessage(userMessage.content, threadId);
+        if (!isVoiceMode) {
+            try {
+                const response = await chatAPI.sendMessage(userMessage.content, threadId);
 
-            // Capture thread_id from first response
-            if (response.thread_id && !threadId) {
-                setThreadId(response.thread_id);
+                // Capture thread_id from first response
+                if (response.thread_id && !threadId) {
+                    setThreadId(response.thread_id);
+                }
+
+                const assistantMessage = {
+                    id: (Date.now() + 1).toString(),
+                    role: mapRole(response.type || 'ai'),
+                    content: response.response || 'I apologize, but I encountered an issue processing your request.',
+                    plan: response.plan || [],
+                    timestamp: new Date(),
+                };
+
+                setMessages(prev => [...prev, assistantMessage]);
+
+                // Refresh sidebar threads
+                loadThreads();
+            } catch (error) {
+                console.error('Chat error:', error);
+
+                const errorMessage = {
+                    id: (Date.now() + 1).toString(),
+                    role: 'assistant',
+                    content: 'I apologize, but I encountered an error. Please try again later.',
+                    isError: true,
+                    timestamp: new Date(),
+                };
+
+                setMessages(prev => [...prev, errorMessage]);
+            } finally {
+                setIsLoading(false);
             }
+        } else {
+            // Voice / Streaming Mode
+            const assistantMessageId = (Date.now() + 1).toString();
 
-            const assistantMessage = {
-                id: (Date.now() + 1).toString(),
-                role: mapRole(response.type || 'ai'),
-                content: response.response || 'I apologize, but I encountered an issue processing your request.',
-                plan: response.plan || [],
-                timestamp: new Date(),
-            };
+            // Stop any currently playing audio
+            if (currentAudio.current) {
+                currentAudio.current.pause();
+                currentAudio.current = null;
+            }
+            audioQueue.current = [];
+            isPlaying.current = false;
 
-            setMessages(prev => [...prev, assistantMessage]);
-
-            // Refresh sidebar threads
-            loadThreads();
-        } catch (error) {
-            console.error('Chat error:', error);
-
-            const errorMessage = {
-                id: (Date.now() + 1).toString(),
+            // Add a placeholder message for the assistant
+            setMessages(prev => [...prev, {
+                id: assistantMessageId,
                 role: 'assistant',
-                content: 'I apologize, but I encountered an error. Please try again later.',
-                isError: true,
-                timestamp: new Date(),
-            };
+                content: '',
+                plan: [],
+                timestamp: new Date()
+            }]);
 
-            setMessages(prev => [...prev, errorMessage]);
-        } finally {
-            setIsLoading(false);
+            try {
+                await chatAPI.streamMessage({
+                    message: userMessage.content,
+                    threadId: threadId,
+                    voiceId: voiceId.trim() || 'default',
+                    onText: (content, plan) => {
+                        setMessages(prev => prev.map(msg => {
+                            if (msg.id === assistantMessageId) {
+                                return { ...msg, content: msg.content + content, plan: plan || msg.plan };
+                            }
+                            return msg;
+                        }));
+                    },
+                    onAudio: (data, format, chunk) => {
+                        audioQueue.current.push(data);
+                        if (!isPlaying.current) {
+                            playNextAudio();
+                        }
+                    },
+                    onInterrupt: (response, tId) => {
+                        if (tId && !threadId) {
+                            setThreadId(tId);
+                        }
+                        setMessages(prev => prev.map(msg => {
+                            if (msg.id === assistantMessageId) {
+                                return { ...msg, content: msg.content + response, role: 'interrupt' };
+                            }
+                            return msg;
+                        }));
+                    },
+                    onDone: () => {
+                        loadThreads();
+                    },
+                    onError: (errMsg) => {
+                        setMessages(prev => prev.map(msg => {
+                            if (msg.id === assistantMessageId) {
+                                return { ...msg, content: msg.content + `\n\n[Error: ${errMsg}]`, isError: true };
+                            }
+                            return msg;
+                        }));
+                    }
+                });
+            } catch (error) {
+                console.error('Streaming error:', error);
+                setMessages(prev => prev.map(msg => {
+                    if (msg.id === assistantMessageId) {
+                        return { ...msg, content: 'I apologize, but I encountered an error during streaming.', isError: true };
+                    }
+                    return msg;
+                }));
+            } finally {
+                setIsLoading(false);
+            }
         }
     };
 
@@ -248,7 +370,7 @@ export default function Chat() {
                             </div>
                         ))}
 
-                        {isLoading && (
+                        {isLoading && !isVoiceMode && (
                             <div className="message-wrapper">
                                 <div className="message message-assistant">
                                     <div className="message-avatar assistant-avatar">
@@ -271,6 +393,34 @@ export default function Chat() {
 
                 {/* Input Area */}
                 <div className="chat-input-container">
+                    <div className="chat-input-actions">
+                        <button
+                            className={`mode-toggle-btn ${!isVoiceMode ? 'active' : ''}`}
+                            onClick={() => setIsVoiceMode(false)}
+                            title="Text Mode"
+                        >
+                            <Type size={16} />
+                            <span>Text</span>
+                        </button>
+                        <button
+                            className={`mode-toggle-btn ${isVoiceMode ? 'active' : ''}`}
+                            onClick={() => setIsVoiceMode(true)}
+                            title="Voice Mode"
+                        >
+                            <Volume2 size={16} />
+                            <span>Voice</span>
+                        </button>
+
+                        {isVoiceMode && (
+                            <input
+                                type="text"
+                                className="voice-id-input"
+                                placeholder="Voice ID (default)"
+                                value={voiceId}
+                                onChange={(e) => setVoiceId(e.target.value)}
+                            />
+                        )}
+                    </div>
                     <div className="chat-input-wrapper">
                         <ChatInput
                             value={input}
@@ -282,7 +432,7 @@ export default function Chat() {
                         <Button
                             variant="primary"
                             size="md"
-                            icon={isLoading ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
+                            icon={isLoading && !isVoiceMode ? <Loader2 className="animate-spin" size={20} /> : <Send size={20} />}
                             onClick={handleSend}
                             disabled={!input.trim() || isLoading}
                             className="chat-send-btn"
