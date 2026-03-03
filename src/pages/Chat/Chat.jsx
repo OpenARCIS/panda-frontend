@@ -292,6 +292,93 @@ export default function Chat() {
         }
     };
 
+    const handleVoiceSubmit = async (audioBlob) => {
+        if (isLoading) return;
+
+        setIsLoading(true);
+        const assistantMessageId = (Date.now() + 1).toString();
+
+        // Stop any currently playing audio
+        if (currentAudio.current) {
+            currentAudio.current.pause();
+            currentAudio.current = null;
+        }
+        audioQueue.current = [];
+        isPlaying.current = false;
+
+        // Add a placeholder message for the user (we don't have text yet)
+        const userMessageId = Date.now().toString();
+        setMessages(prev => [...prev, {
+            id: userMessageId,
+            role: 'user',
+            content: '🎤 Sent a voice message...',
+            timestamp: new Date()
+        }]);
+
+        // Add a placeholder message for the assistant
+        setMessages(prev => [...prev, {
+            id: assistantMessageId,
+            role: 'assistant',
+            content: '',
+            plan: [],
+            timestamp: new Date()
+        }]);
+
+        try {
+            await chatAPI.streamVoiceMessage({
+                file: new File([audioBlob], 'recording.wav', { type: 'audio/wav' }),
+                threadId: threadId,
+                voiceId: voiceId.trim() || 'default',
+                onText: (content, plan) => {
+                    setMessages(prev => prev.map(msg => {
+                        if (msg.id === assistantMessageId) {
+                            return { ...msg, content: msg.content + content, plan: plan || msg.plan };
+                        }
+                        return msg;
+                    }));
+                },
+                onAudio: (data, format, chunk) => {
+                    audioQueue.current.push(data);
+                    if (!isPlaying.current) {
+                        playNextAudio();
+                    }
+                },
+                onInterrupt: (response, tId) => {
+                    if (tId && !threadId) {
+                        setThreadId(tId);
+                    }
+                    setMessages(prev => prev.map(msg => {
+                        if (msg.id === assistantMessageId) {
+                            return { ...msg, content: msg.content + response, role: 'interrupt' };
+                        }
+                        return msg;
+                    }));
+                },
+                onDone: () => {
+                    loadThreads();
+                },
+                onError: (errMsg) => {
+                    setMessages(prev => prev.map(msg => {
+                        if (msg.id === assistantMessageId) {
+                            return { ...msg, content: msg.content + `\n\n[Error: ${errMsg}]`, isError: true };
+                        }
+                        return msg;
+                    }));
+                }
+            });
+        } catch (error) {
+            console.error('Streaming API error:', error);
+            setMessages(prev => prev.map(msg => {
+                if (msg.id === assistantMessageId) {
+                    return { ...msg, content: 'I apologize, but I encountered an error during audio upload/streaming.', isError: true };
+                }
+                return msg;
+            }));
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
     const handleKeyDown = (e) => {
         if (e.key === 'Enter' && !e.shiftKey) {
             e.preventDefault();
@@ -426,8 +513,10 @@ export default function Chat() {
                             value={input}
                             onChange={(e) => setInput(e.target.value)}
                             onKeyDown={handleKeyDown}
-                            placeholder="Type your message..."
+                            placeholder={isVoiceMode ? "Click the microphone to record..." : "Type your message..."}
                             disabled={isLoading}
+                            isVoiceMode={isVoiceMode}
+                            onVoiceSubmit={handleVoiceSubmit}
                         />
                         <Button
                             variant="primary"

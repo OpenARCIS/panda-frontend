@@ -1,4 +1,4 @@
-const API_BASE_URL = import.meta.env.VITE_API_URL || 'https://test.itsvinayak.eu.org:8501';
+const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000';
 
 // Helper function for API calls
 async function fetchAPI(endpoint, options = {}) {
@@ -117,6 +117,76 @@ export const chatAPI = {
                         try {
                             const data = JSON.parse(dataStr);
 
+                            switch (data.type) {
+                                case 'text':
+                                    if (onText) onText(data.content, data.plan);
+                                    break;
+                                case 'audio':
+                                    if (onAudio) onAudio(data.data, data.format, data.chunk);
+                                    break;
+                                case 'done':
+                                    if (onDone) onDone();
+                                    break;
+                                case 'error':
+                                    if (onError) onError(data.message);
+                                    break;
+                                case 'interrupt':
+                                    if (onInterrupt) onInterrupt(data.response, data.thread_id);
+                                    break;
+                                default:
+                                    console.warn('Unknown stream event type:', data.type);
+                            }
+                        } catch (e) {
+                            console.error("Failed to parse stream JSON", e, "Raw data:", dataStr);
+                        }
+                    }
+                }
+            }
+        } catch (error) {
+            if (onError) onError(error.message);
+            throw error;
+        }
+    },
+
+    streamVoiceMessage: async ({ file, threadId = null, voiceId = 'default', onText, onAudio, onDone, onError, onInterrupt }) => {
+        const url = `${API_BASE_URL}/chat/voice/stream?voice_id=${encodeURIComponent(voiceId)}`;
+        const formData = new FormData();
+        formData.append('file', file);
+        if (threadId) {
+            formData.append('thread_id', threadId);
+        }
+
+        try {
+            const response = await fetch(url, {
+                method: 'POST',
+                body: formData,
+            });
+
+            if (!response.ok) {
+                const error = await response.json().catch(() => ({ message: 'An error occurred' }));
+                throw new Error(error.detail || error.message || 'API Error');
+            }
+
+            const reader = response.body.getReader();
+            const decoder = new TextDecoder("utf-8");
+            let buffer = '';
+
+            while (true) {
+                const { done, value } = await reader.read();
+                if (done) break;
+
+                buffer += decoder.decode(value, { stream: true });
+                const lines = buffer.split('\n');
+                buffer = lines.pop(); // Keep incomplete line
+
+                for (const line of lines) {
+                    if (line.startsWith('data: ')) {
+                        const dataStr = line.substring(6).trim();
+                        if (dataStr === '[DONE]') continue;
+                        if (!dataStr) continue;
+
+                        try {
+                            const data = JSON.parse(dataStr);
                             switch (data.type) {
                                 case 'text':
                                     if (onText) onText(data.content, data.plan);
